@@ -1,12 +1,13 @@
 # %%
 
+from detectron2.data import build_detection_test_loader
+from detectron2.evaluation import COCOEvaluator, inference_on_dataset
 import json
 import cv2
 import matplotlib.pyplot as plt
 from PIL import Image
 from detectron2.utils.visualizer import ColorMode
 import ipywidgets as widgets
-from detectron2.engine import DefaultTrainer
 from detectron2.data.datasets import register_coco_instances
 from detectron2.data import MetadataCatalog
 from detectron2.utils.visualizer import Visualizer
@@ -22,6 +23,7 @@ from sklearn.metrics import confusion_matrix
 import numpy as np
 import os
 from detectron2.utils.logger import setup_logger
+from utils_detectron import CocoTrainer2
 
 
 def get_image_list(path):
@@ -140,7 +142,7 @@ def update(idx=10, bbox=True, mask=True, score=True, true_label=True, mode='test
 setup_logger()
 # General definitions:
 mask_it = True
-train = False
+train = True
 
 # Register datasets
 path = '../'
@@ -155,7 +157,6 @@ register_coco_instances(
 register_coco_instances(
     "my_dataset_test", {}, os.path.join(path, "test.json"), pic_path
 )
-# %%
 # get standard configurations
 cfg = get_cfg()
 
@@ -182,16 +183,16 @@ else:
 # select datasets
 cfg.DATASETS.TRAIN = ("my_dataset_train",)
 cfg.DATASETS.TEST = ("my_dataset_valid",)
-cfg.TEST.EVAL_PERIOD = 20
-cfg.DATALOADER.NUM_WORKERS = 0
-cfg.SOLVER.IMS_PER_BATCH = 1
+cfg.TEST.EVAL_PERIOD = 2000
+cfg.DATALOADER.NUM_WORKERS = 6
+cfg.SOLVER.IMS_PER_BATCH = 4
 cfg.SOLVER.BASE_LR = 0.00025
-cfg.SOLVER.MAX_ITER = 5000
-cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 128
+cfg.SOLVER.MAX_ITER = 40000
+cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 256
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
 cfg.DATALOADER.SAMPLER_TRAIN = "RepeatFactorTrainingSampler"
 cfg.DATALOADER.REPEAT_THRESHOLD = 0.2
-cfg.OUTPUT_DIR = "./output"
+cfg.OUTPUT_DIR = "../output"
 
 # Color and Class definitions
 mal_col = (255, 69, 0)  # red
@@ -203,12 +204,10 @@ MetadataCatalog.get(cfg.DATASETS.TRAIN[0]).thing_colors = [
     mal_col,
 ]
 
-# %%
-
 # Select Trainer
 os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
 
-trainer = DefaultTrainer(cfg)
+trainer = CocoTrainer2(cfg)
 trainer.resume_or_load(resume=False)
 # %%
 if train:
@@ -230,4 +229,22 @@ res_test = personal_score(mode='test')
 plot_confusion_matrix(res_valid['conf'], res_valid['cat_list'])
 plot_confusion_matrix(res_test['conf'], res_test['cat_list'])
 
+# %%
+
+evaluator = COCOEvaluator(
+    "my_dataset_train", cfg, False, output_dir=cfg.OUTPUT_DIR)
+val_loader = build_detection_test_loader(cfg, "my_dataset_train")
+print(inference_on_dataset(trainer.model, val_loader, evaluator))
+# %%
+
+evaluator = COCOEvaluator(
+    "my_dataset_valid", cfg, False, output_dir=cfg.OUTPUT_DIR)
+val_loader = build_detection_test_loader(cfg, "my_dataset_valid")
+print(inference_on_dataset(trainer.model, val_loader, evaluator))
+
+# %%
+evaluator = COCOEvaluator(
+    "my_dataset_test", cfg, False, output_dir=cfg.OUTPUT_DIR)
+val_loader = build_detection_test_loader(cfg, "my_dataset_test")
+print(inference_on_dataset(trainer.model, val_loader, evaluator))
 # %%
