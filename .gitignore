@@ -1,3 +1,4 @@
 data
 src/output
+src/__pycache__
 *.json

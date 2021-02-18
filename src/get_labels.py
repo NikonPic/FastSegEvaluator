@@ -105,7 +105,7 @@ def draw_lines(img, lines):
                 x_old, y_old = x, y
 
     arr_img = np.array(img)
-    plt.imshow(arr_img)
+    return arr_img
 
 
 def tlbr2bbox(top, left, bottom, right, op=int):
@@ -323,8 +323,29 @@ def label_to_poly(label, sh_img):
     lines = get_lines(points)
     lines = transform_lines(lines, scale, offset_x, offset_y)
     poly = Polygons.create(lines)
-
     return poly
+
+
+def get_transformed_lines(arr_img, complete_labelname):
+    """
+    take image and labelname and calculate the transformed lines
+    """
+    sh_img = arr_img.shape[:2]
+
+    # read file
+    with open(complete_labelname) as f:
+        label_content = f.read()
+
+    # fit images
+    sh_labeler = [int(dim)
+                  for dim in label_content.split('///')[1].split(',')[:2]]
+    scale, offset_x, offset_y = get_scale_and_offset(sh_img, sh_labeler)
+
+    # get coordinates and lines
+    points = label_content.split('///')[0].split(';')
+    lines = get_lines(points)
+    lines = transform_lines(lines, scale, offset_x, offset_y)
+    return lines
 
 
 def update(idx=10):
@@ -339,43 +360,30 @@ def update(idx=10):
     imgpath = f'{path}/{classname}/{patname}_{patnum}_{plane}_{slicenum}.png'
     img = Image.open(imgpath)
     arr_img = np.array(img)
-    sh_img = arr_img.shape[:2]
-
-    # read file
-    with open(filename) as f:
-        label_content = f.read()
-
-    # fit images
-    sh_labeler = [int(dim)
-                  for dim in label_content.split('///')[1].split(',')[:2]]
-    scale, offset_x, offset_y = get_scale_and_offset(sh_img, sh_labeler)
-
-    # get coordinates and lines
-    points = label_content.split('///')[0].split(';')
-    lines = get_lines(points)
-    lines = transform_lines(lines, scale, offset_x, offset_y)
+    lines = get_transformed_lines(arr_img, filename)
 
     # draw the lines on the image
-    draw_lines(img, lines)
+    arr_img = draw_lines(img, lines)
+    plt.imshow(arr_img)
 
 
 # %%
-path = '../data/dataset'
-labelname = 'labels2'
-split = {
-    'train': 0.7,
-    'valid': 0.2,
-    'test': 0.1
-}
+if __name__ == '__main__':
+    path = '../data/dataset'
+    labelname = 'labels2'
+    split = {
+        'train': 0.7,
+        'valid': 0.2,
+        'test': 0.1
+    }
 
-labelpath = f'{path}/{labelname}'
-labelfiles = os.listdir(labelpath)
+    labelpath = f'{path}/{labelname}'
+    labelfiles = os.listdir(labelpath)
 
-# create the coco files depending on the split
-create_cocos(labelfiles, split)
-dis = dis_labels(labelfiles, split)
+    # create the coco files depending on the split
+    create_cocos(labelfiles, split)
+    dis = dis_labels(labelfiles, split)
 
-# explore dataset
-idx = widgets.IntSlider(min=0, max=len(labelfiles)-1, value=0, step=1)
-widgets.interactive(update, idx=idx)
-# %%
+    # explore dataset
+    idx = widgets.IntSlider(min=0, max=len(labelfiles)-1, value=0, step=1)
+    widgets.interactive(update, idx=idx)
