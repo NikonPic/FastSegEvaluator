@@ -58,5 +58,4 @@ def plot_confusion_matrix(
         "Predicted label\naccuracy={:0.4f}; misclass={:0.4f}".format(
             accuracy, misclass), fontsize=ft
     )
-    plt.show()
     return fig

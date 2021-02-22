@@ -387,7 +387,7 @@ def build_transform_gen(cfg, is_train):
     if is_train:
         # Crop
         tfm_gens.insert(0, (T.RandomCrop(
-            crop_type="relative_range", crop_size=[0.7, 1])))
+            crop_type="relative_range", crop_size=[0.6, 1])))
         # Horizontal
         tfm_gens.append(T.RandomFlip(horizontal=True))
         # Vertical
@@ -395,14 +395,14 @@ def build_transform_gen(cfg, is_train):
         # Lightning
         tfm_gens.append(T.RandomLighting(scale=3))
         # Brightness
-        tfm_gens.append(T.RandomBrightness(0.9, 1.1))
+        tfm_gens.append(T.RandomBrightness(0.7, 1.3))
         # Contrast
-        tfm_gens.append(T.RandomContrast(0.9, 1.1))
+        tfm_gens.append(T.RandomContrast(0.7, 1.3))
         # Intensity
         tfm_gens.append(T.RandomSaturation(
-            intensity_min=0.7, intensity_max=1.3))
+            intensity_min=0.6, intensity_max=1.4))
         # NEW: Rotation
-        tfm_gens.append(RandomRot(deg_range=60))
+        tfm_gens.append(RandomRot(deg_range=120))
 
         logger.info("TransformGens used in training: " + str(tfm_gens))
 

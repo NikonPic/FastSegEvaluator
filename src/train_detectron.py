@@ -139,10 +139,12 @@ def update(idx=10, bbox=True, mask=True, score=True, true_label=True, mode='test
 
 
 # %%
-setup_logger()
 # General definitions:
 mask_it = True
 train = True
+
+if train:
+    setup_logger()
 
 # Register datasets
 path = '../'
@@ -183,16 +185,16 @@ else:
 # select datasets
 cfg.DATASETS.TRAIN = ("my_dataset_train",)
 cfg.DATASETS.TEST = ("my_dataset_valid",)
-cfg.TEST.EVAL_PERIOD = 2000
+cfg.TEST.EVAL_PERIOD = 1000
 cfg.DATALOADER.NUM_WORKERS = 6
-cfg.SOLVER.IMS_PER_BATCH = 4
+cfg.SOLVER.IMS_PER_BATCH = 2
 cfg.SOLVER.BASE_LR = 0.00025
-cfg.SOLVER.MAX_ITER = 40000
-cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 256
+cfg.SOLVER.MAX_ITER = 50000
+cfg.MODEL.ROI_HEADS.BATCH_SIZE_PER_IMAGE = 512
 cfg.MODEL.ROI_HEADS.NUM_CLASSES = 2
 cfg.DATALOADER.SAMPLER_TRAIN = "RepeatFactorTrainingSampler"
-cfg.DATALOADER.REPEAT_THRESHOLD = 0.2
-cfg.OUTPUT_DIR = "../output"
+cfg.DATALOADER.REPEAT_THRESHOLD = 0.3
+cfg.OUTPUT_DIR = "../output3"
 
 # Color and Class definitions
 mal_col = (255, 69, 0)  # red
@@ -226,8 +228,8 @@ widgets.interactive(update)
 res_valid = personal_score(mode='valid')
 res_test = personal_score(mode='test')
 
-plot_confusion_matrix(res_valid['conf'], res_valid['cat_list'])
-plot_confusion_matrix(res_test['conf'], res_test['cat_list'])
+fig1 = plot_confusion_matrix(res_valid['conf'], res_valid['cat_list'])
+fig2 = plot_confusion_matrix(res_test['conf'], res_test['cat_list'])
 
 # %%
 
