@@ -4,7 +4,7 @@ import glob
 from shutil import copyfile
 
 labeler = 'Degenhardt'
-labeldir = './labels2'
+labeldir = '..data/labels2'
 classnames_final = ['Neurogen', 'Strukturell']
 
 labels = os.listdir(labeldir)

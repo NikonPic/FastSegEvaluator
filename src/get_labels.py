@@ -47,9 +47,10 @@ def get_lines(points):
         if point_string == ' ':
             lines.append(line.copy())
             line = []
-        else:
+        elif len(point_string) > 2:
             # get point
-            x, y = [int(point) for point in point_string.split(',')]
+            x, y = [int(float(point))
+                    for point in point_string.split(',')]
 
             # only add new point
             if (x != x_old) or (y != y_old):
@@ -146,7 +147,12 @@ def get_classnames(labels):
 
 
 def get_patnum(label):
-    return int(label.split('.')[0].split('_')[3])
+    if label.split('.')[0].split('_')[3] == 'patient':
+        patnum = int(label.split('.')[0].split('_')[4])
+    else:
+        patnum = int(label.split('.')[0].split('_')[3])
+
+    return patnum
 
 
 def dis_labels(labels, split):
@@ -248,9 +254,12 @@ def create_cocos(labels, split):
 
 def perform_file_dict(label, id_label, classnames):
     """get the coco infos for a single file"""
-
-    _, classname, patname, patnum, plane, slicenum = label.split('.')[
-        0].split('_')
+    if label.split('.')[0].split('_')[3] == 'patient':
+        _, classname, _, patname, patnum, plane, slicenum = label.split('.')[
+            0].split('_')
+    else:
+        _, classname, patname, patnum, plane, slicenum = label.split('.')[
+            0].split('_')
 
     imgpath = f'{path}/{classname}/{patname}_{patnum}_{plane}_{slicenum}.png'
     img = Image.open(imgpath)
@@ -369,7 +378,7 @@ def update(idx=10):
 
 # %%
 if __name__ == '__main__':
-    path = '../data/dataset'
+    path = '../data'
     labelname = 'labels2'
     split = {
         'train': 0.7,
@@ -389,4 +398,4 @@ if __name__ == '__main__':
     widgets.interactive(update, idx=idx)
 
 
-
+# %%
