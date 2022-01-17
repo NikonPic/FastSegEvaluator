@@ -16,20 +16,36 @@ def get_scale_and_offset(sh_img, sh_labeler):
     """
     calculate the scale depending on the offset
     """
+    sh_labeler = [752.9, 856.7]
+    # swap, as img is currently stored as (y, x)
+    sh_img = [sh_img[1], sh_img[0]]
+    print(sh_img)
 
     scale_x = sh_labeler[0] / sh_img[0]
     scale_y = sh_labeler[1] / sh_img[1]
+    print(scale_x, scale_y)
+    print(sh_labeler)
 
     offset_x = 0
     offset_y = 0
     scale = 1
 
     if scale_x < scale_y:
+        print('scale x')
         scale = scale_x
-        offset_y = (sh_labeler[1] - sh_img[1] * scale) / 2
-    else:
-        scale = scale_y
         offset_x = (sh_labeler[0] - sh_img[0] * scale) / 2
+        offset_y = (sh_labeler[1] - sh_img[1] * scale) / 2
+        print(offset_x)
+        print(offset_y)
+    else:
+        print('scale y')
+        scale = scale_y
+
+        offset_x = (sh_labeler[0] - sh_img[0] * scale) / 2
+        offset_y = (sh_labeler[1] - sh_img[1] * scale) / 2
+
+        print(offset_x)
+        print(offset_y)
 
     return scale, offset_x, offset_y
 
@@ -101,7 +117,7 @@ def draw_lines(img, lines):
                 x, y = point[0], point[1]
                 # start from second
                 if i > 0:
-                    draw.line((x, y, x_old, y_old), fill=100)
+                    draw.line((x, y, x_old, y_old),width=3, fill=(0,255,0))
                 # reset old
                 x_old, y_old = x, y
 
@@ -364,22 +380,31 @@ def update(idx=10):
     labelfiles = os.listdir(labelpath)
     label = labelfiles[idx]
     filename = f'{labelpath}/{label}'
-    _, classname, patname, patnum, plane, slicenum = label.split('.')[
-        0].split('_')
-    imgpath = f'{path}/{classname}/{patname}_{patnum}_{plane}_{slicenum}.png'
+
+    imgname = filename.split('_')[5].replace('.png.txt', '')
+    if len(filename.split('_')) == 7:
+        imgname = f'{imgname}_1'
+
+    print(len(filename.split('_')))
+
+    imgpath = f'{path}/{path_img}/{imgname}.png'
+    print(imgpath)
     img = Image.open(imgpath)
     arr_img = np.array(img)
     lines = get_transformed_lines(arr_img, filename)
 
     # draw the lines on the image
     arr_img = draw_lines(img, lines)
+    plt.figure(figsize=(16, 16))
     plt.imshow(arr_img)
 
 
 # %%
 if __name__ == '__main__':
     path = '../data'
-    labelname = 'labels2'
+    labelname = 'labels_Basti'
+    path_img = 'osteosarcoma_data_final_unlabelled'
+
     split = {
         'train': 0.7,
         'valid': 0.2,
@@ -390,12 +415,14 @@ if __name__ == '__main__':
     labelfiles = os.listdir(labelpath)
 
     # create the coco files depending on the split
-    create_cocos(labelfiles, split)
-    dis = dis_labels(labelfiles, split)
+    # create_cocos(labelfiles, split)
+    #dis = dis_labels(labelfiles, split)
 
     # explore dataset
-    idx = widgets.IntSlider(min=0, max=len(labelfiles)-1, value=0, step=1)
+    idx = widgets.IntSlider(min=0, max=len(labelfiles)-1, value=3, step=1)
     widgets.interactive(update, idx=idx)
 
 
+# %%
+widgets.interactive(update, idx=idx)
 # %%

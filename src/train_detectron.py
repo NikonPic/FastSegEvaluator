@@ -55,7 +55,7 @@ def filename_to_labelname(filename, path):
     return 'no matching label!'
 
 
-def get_label_img(img, filename, path='../data/dataset/labels2'):
+def get_label_img(img, filename, path='../data/labels2'):
     """read label, and get the matching transformed lines"""
     # get the labelname
     label = filename_to_labelname(filename, path)
@@ -141,7 +141,7 @@ def update(idx=10, bbox=True, mask=True, score=True, true_label=True, mode='test
 # %%
 # General definitions:
 mask_it = True
-train = True
+train = False
 
 if train:
     setup_logger()
@@ -217,13 +217,14 @@ if train:
 # %%
 
 
-cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
+cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_0004999.pth")
 cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.0
 cfg.DATASETS.TEST = ("my_dataset_test",)
 predictor = DefaultPredictor(cfg)
 
-
-widgets.interactive(update)
+# %%
+idx = widgets.IntSlider(8, 0, 30)
+widgets.interactive(update, idx=idx)
 # %%
 res_valid = personal_score(mode='valid')
 res_test = personal_score(mode='test')
