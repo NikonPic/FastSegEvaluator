@@ -401,10 +401,14 @@ def update(idx=10):
 
 # %%
 if __name__ == '__main__':
+    #  select general path
     path = '../data'
+    # get the labelname of the folder
     labelname = 'labels_Basti'
+    # get the path to the image folder
     path_img = 'osteosarcoma_data_final_unlabelled'
 
+    # define the required datasplit for training
     split = {
         'train': 0.7,
         'valid': 0.2,
@@ -415,14 +419,11 @@ if __name__ == '__main__':
     labelfiles = os.listdir(labelpath)
 
     # create the coco files depending on the split
-    # create_cocos(labelfiles, split)
-    #dis = dis_labels(labelfiles, split)
+    create_cocos(labelfiles, split)
+    dis = dis_labels(labelfiles, split)
 
     # explore dataset
     idx = widgets.IntSlider(min=0, max=len(labelfiles)-1, value=3, step=1)
     widgets.interactive(update, idx=idx)
 
-
-# %%
-widgets.interactive(update, idx=idx)
-# %%
+    # %%
