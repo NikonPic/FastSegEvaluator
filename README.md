@@ -1,5 +1,5 @@
-# FastSegEvaluator
-> A deep learning pipeline for dataset preparation, training, and validation of medical datasets obtained from the [FastSeg application](https://github.com/NikonPic/FastSeg) and based on [detectron2](https://github.com/facebookresearch/detectron2).
+# MediAnnotateEvaluator
+> A deep learning pipeline for dataset preparation, training, and validation of medical datasets obtained from the [MediAnnotate application](https://github.com/NikonPic/FastSeg) and based on [detectron2](https://github.com/facebookresearch/detectron2).
 
 <p align="center">
   <img src="results/model.png" width="400">
